@@ -67,7 +67,7 @@ public class OracleClient
     @Inject
     public OracleClient(BaseJdbcConfig config, OracleConfig oracleConfig, ConnectionFactory connectionFactory)
     {
-        super(config, Character.toString('"'), connectionFactory);
+        super(config, "\"", connectionFactory);
         this.oracleConfig = oracleConfig;
     }
 
@@ -83,7 +83,7 @@ public class OracleClient
             while (resultSet.next()) {
                 // Schema Names are in "TABLE_SCHEM" for Oracle
                 String schemaName = resultSet.getString(META_DB_NAME_FIELD);
-                if(schemaName == null) {
+                if (schemaName == null) {
                     LOG.error("connection.getMetaData().getSchemas() returned null schema name");
                     continue;
                 }
@@ -100,10 +100,11 @@ public class OracleClient
         }
 
         // Merge schema synonyms with all schema names.
-        if(oracleConfig.isSynonymsEnabled()) {
+        if (oracleConfig.isSynonymsEnabled()) {
             try {
                 schemaNames.addAll(listSchemaSynonyms(connection));
-            } catch (PrestoException ex2) {
+            }
+            catch (PrestoException ex2) {
                 LOG.error(ex2);
             }
         }
@@ -119,7 +120,8 @@ public class OracleClient
                 String schemaSynonym = resultSet.getString(META_DB_NAME_FIELD);
                 schemaSynonyms.add(schemaSynonym);
             }
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             throw new PrestoException(
                     JDBC_ERROR, format("Failed retrieving schema synonyms, query was: %s", QUERY_SCHEMA_SYNS));
         }
@@ -206,7 +208,7 @@ public class OracleClient
     public List<JdbcColumnHandle> getColumns(ConnectorSession session, JdbcTableHandle tableHandle)
     {
         try (Connection connection = connectionFactory.openConnection(JdbcIdentity.from(session))) {
-            if(oracleConfig.isSynonymsEnabled()) {
+            if (oracleConfig.isSynonymsEnabled()) {
                 ((oracle.jdbc.driver.OracleConnection) connection).setIncludeSynonyms(true);
             }
             int allColumns = 0;
@@ -260,13 +262,8 @@ public class OracleClient
     }
 
     /**
-     * Return an anonymous method that acts as a type mapper for the given column type.
-     * Each method is called a ReadFunction, which reads data in and converts the JDBC type to a supported Presto Type
-     * For more details see OracleReadFunctions.java
-     *
-     * See: https://github.com/prestodb/presto/blob/3060c65a1812c6c8b0c2ab725b0184dbad67f0ed/presto-base-jdbc/src/main/java/com/facebook/presto/plugin/jdbc/StandardReadFunctions.java
-     *
-     * JdbcRecordCursor is what calls this method
+     * Custom implementation of type-handling for reading column data from Oracle.
+     * Deals with NUMERIC types intelligently to avoid overflows, and handles Oracle special cases.
      *
      * @param session
      * @param typeHandle
@@ -299,9 +296,11 @@ public class OracleClient
                 try {
                     OracleNumberHandling numberHandling = new OracleNumberHandling(orcTypeHandle, this.oracleConfig);
                     readType = Optional.of(numberHandling.getColumnMapping());
-                } catch (IgnoreFieldException ex) {
+                }
+                catch (IgnoreFieldException ex) {
                     return Optional.empty(); // skip field
-                } catch (PrestoException ex) {
+                }
+                catch (PrestoException ex) {
                     error  = ex.toString();
                 }
                 break;
@@ -309,7 +308,7 @@ public class OracleClient
                 readType = super.toPrestoType(session, connection, typeHandle);
         }
 
-        if(!readType.isPresent()) {
+        if (!readType.isPresent()) {
             String msg = format("unsupported type %s - %s", orcTypeHandle.getDescription(), error);
             switch(oracleConfig.getUnsupportedTypeStrategy()) {
                 case VARCHAR:
@@ -324,10 +323,5 @@ public class OracleClient
             }
         }
         return readType;
-    }
-
-    public OracleConfig getOracleConfig()
-    {
-        return this.oracleConfig;
     }
 }

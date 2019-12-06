@@ -31,9 +31,6 @@ public class TestOracleConfig
         ConfigAssertions.assertRecordedDefaults(ConfigAssertions.recordDefaults(OracleConfig.class)
                 .setSynonymsEnabled(false)
                 .setUnsupportedTypeStrategy("IGNORE")
-                .setAutoReconnect(true)
-                .setMaxReconnects(3)
-                .setConnectionTimeout(new Duration(10, TimeUnit.SECONDS))
                 .setNumberExceedsLimitsMode("ROUND")
                 .setNumberTypeDefault("DECIMAL")
                 .setNumberZeroScaleType("")
@@ -84,9 +81,6 @@ public class TestOracleConfig
                 .build();
 
         OracleConfig expected = new OracleConfig()
-                .setAutoReconnect(false)
-                .setMaxReconnects(5)
-                .setConnectionTimeout(new Duration(11, TimeUnit.SECONDS))
                 .setUnsupportedTypeStrategy("FAIL")
                 .setSynonymsEnabled(true)
                 .setNumberExceedsLimitsMode("ROUND")

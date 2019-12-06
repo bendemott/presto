@@ -14,6 +14,7 @@
 package io.prestosql.plugin.oracle;
 
 import com.google.inject.Binder;
+import com.google.inject.Key;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.google.inject.Singleton;
@@ -22,8 +23,14 @@ import io.prestosql.plugin.jdbc.BaseJdbcConfig;
 import io.prestosql.plugin.jdbc.ConnectionFactory;
 import io.prestosql.plugin.jdbc.DriverConnectionFactory;
 import io.prestosql.plugin.jdbc.JdbcClient;
+import io.prestosql.plugin.jdbc.credential.ConfigFileBasedCredentialProvider;
+import io.prestosql.plugin.jdbc.credential.CredentialConfig;
 import io.prestosql.plugin.jdbc.credential.CredentialProvider;
+import io.prestosql.plugin.jdbc.credential.ExtraCredentialProvider;
 import oracle.jdbc.OracleDriver;
+
+import java.util.Optional;
+import java.util.Properties;
 
 import static io.airlift.configuration.ConfigBinder.configBinder;
 
@@ -41,8 +48,16 @@ public class OracleClientModule
 
     @Provides
     @Singleton
-    public ConnectionFactory getConnectionFactory(BaseJdbcConfig config, CredentialProvider credentialProvider)
+    public ConnectionFactory getConnectionFactory(BaseJdbcConfig config, CredentialProvider credentialProvider, OracleConfig oracleConfig)
     {
-        return new DriverConnectionFactory(new OracleDriver(), config, credentialProvider);
+        // Extra oracle-specific connection properties
+        Properties connectionProperties = new Properties();
+        connectionProperties.setProperty("includeSynonyms", String.valueOf(oracleConfig.isSynonymsEnabled()));
+
+        return new DriverConnectionFactory(
+                new OracleDriver(),
+                config.getConnectionUrl(),
+                connectionProperties,
+                credentialProvider);
     }
 }

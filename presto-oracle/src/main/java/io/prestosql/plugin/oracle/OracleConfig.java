@@ -29,8 +29,6 @@ import java.util.stream.Collectors;
 
 import static io.prestosql.spi.StandardErrorCode.CONFIGURATION_INVALID;
 
-;
-
 public class OracleConfig
 {
     public static final JDBCType UNDEFINED_TYPE = JDBCType.OTHER;
@@ -39,9 +37,6 @@ public class OracleConfig
     private static final int MAX_DOUBLE_PRECISION = 15;
     private boolean synonymsEnabled = false;
     private UnsupportedTypeHandling typeStrategy = UnsupportedTypeHandling.IGNORE;
-    private boolean autoReconnect = true;
-    private int maxReconnects = 3;
-    private Duration connectionTimeout = new Duration(10, TimeUnit.SECONDS);
     private UnsupportedTypeHandling numberExceedsLimitsMode = UnsupportedTypeHandling.ROUND;
     private JDBCType numberTypeDefault = JDBCType.DECIMAL;
     private JDBCType numberZeroScaleType = JDBCType.INTEGER;
@@ -84,46 +79,6 @@ public class OracleConfig
         if(typeStrategy.equals(UnsupportedTypeHandling.ROUND)) {
             throw new PrestoException(CONFIGURATION_INVALID, "ROUND is not a valid option for unsupported-type.handling-strategy");
         }
-        return this;
-    }
-
-    /** Get oracle.auto-reconnect */
-    public boolean isAutoReconnect()
-    {
-        return autoReconnect;
-    }
-
-    @Config("oracle.auto-reconnect")
-    public OracleConfig setAutoReconnect(boolean autoReconnect)
-    {
-        this.autoReconnect = autoReconnect;
-        return this;
-    }
-
-    /** Get oracle.max-reconnects */
-    @Min(1)
-    public int getMaxReconnects()
-    {
-        return maxReconnects;
-    }
-
-    @Config("oracle.max-reconnects")
-    public OracleConfig setMaxReconnects(int maxReconnects)
-    {
-        this.maxReconnects = maxReconnects;
-        return this;
-    }
-
-    /** Get oracle.connection-timeout */
-    public Duration getConnectionTimeout()
-    {
-        return connectionTimeout;
-    }
-
-    @Config("oracle.connection-timeout")
-    public OracleConfig setConnectionTimeout(Duration connectionTimeout)
-    {
-        this.connectionTimeout = connectionTimeout;
         return this;
     }
 

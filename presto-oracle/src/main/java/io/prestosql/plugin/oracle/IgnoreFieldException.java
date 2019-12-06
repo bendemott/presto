@@ -16,7 +16,9 @@ package io.prestosql.plugin.oracle;
 import io.prestosql.spi.PrestoException;
 import io.prestosql.spi.StandardErrorCode;
 
-public class IgnoreFieldException extends PrestoException {
+public class IgnoreFieldException 
+        extends PrestoException 
+{
     public IgnoreFieldException(String s) {
         super(StandardErrorCode.GENERIC_INTERNAL_ERROR, s);
     }
