@@ -13,23 +13,13 @@
  */
 package io.prestosql.plugin.oracle;
 
-import com.google.common.collect.ImmutableList;
-import io.prestosql.spi.Plugin;
-import io.prestosql.spi.connector.ConnectorFactory;
-
-import static com.google.common.base.MoreObjects.firstNonNull;
+import io.prestosql.plugin.jdbc.JdbcPlugin;
 
 public class OraclePlugin
-        implements Plugin
+        extends JdbcPlugin
 {
-    @Override
-    public Iterable<ConnectorFactory> getConnectorFactories()
+    public OraclePlugin()
     {
-        return ImmutableList.of(new OracleConnectorFactory(getClassLoader()));
-    }
-
-    private static ClassLoader getClassLoader()
-    {
-        return firstNonNull(Thread.currentThread().getContextClassLoader(), OraclePlugin.class.getClassLoader());
+        super("oracle", new OracleModule());
     }
 }

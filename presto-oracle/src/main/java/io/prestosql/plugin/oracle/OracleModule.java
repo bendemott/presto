@@ -14,29 +14,27 @@
 package io.prestosql.plugin.oracle;
 
 import com.google.inject.Binder;
-import com.google.inject.Key;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import io.airlift.configuration.AbstractConfigurationAwareModule;
+import io.airlift.log.Logger;
 import io.prestosql.plugin.jdbc.BaseJdbcConfig;
 import io.prestosql.plugin.jdbc.ConnectionFactory;
 import io.prestosql.plugin.jdbc.DriverConnectionFactory;
 import io.prestosql.plugin.jdbc.JdbcClient;
-import io.prestosql.plugin.jdbc.credential.ConfigFileBasedCredentialProvider;
-import io.prestosql.plugin.jdbc.credential.CredentialConfig;
 import io.prestosql.plugin.jdbc.credential.CredentialProvider;
-import io.prestosql.plugin.jdbc.credential.ExtraCredentialProvider;
 import oracle.jdbc.OracleDriver;
 
-import java.util.Optional;
 import java.util.Properties;
 
 import static io.airlift.configuration.ConfigBinder.configBinder;
 
-public class OracleClientModule
+public class OracleModule
         extends AbstractConfigurationAwareModule
 {
+    private static final Logger LOG = Logger.get(OracleModule.class);
+
     @Override
     protected void setup(Binder binder)
     {
