@@ -24,6 +24,7 @@ import io.prestosql.plugin.jdbc.ConnectionFactory;
 import io.prestosql.plugin.jdbc.DriverConnectionFactory;
 import io.prestosql.plugin.jdbc.JdbcClient;
 import io.prestosql.plugin.jdbc.credential.CredentialProvider;
+import io.prestosql.spi.statistics.TableStatisticsMetadata;
 import oracle.jdbc.OracleDriver;
 
 import java.util.Properties;
@@ -33,14 +34,11 @@ import static io.airlift.configuration.ConfigBinder.configBinder;
 public class OracleModule
         extends AbstractConfigurationAwareModule
 {
-    private static final Logger LOG = Logger.get(OracleModule.class);
-
     @Override
     protected void setup(Binder binder)
     {
         binder.bind(JdbcClient.class).to(OracleClient.class).in(Scopes.SINGLETON);
         buildConfigObject(BaseJdbcConfig.class);
-        configBinder(binder).bindConfig(BaseJdbcConfig.class);
         configBinder(binder).bindConfig(OracleConfig.class);
     }
 
