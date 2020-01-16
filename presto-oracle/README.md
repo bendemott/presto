@@ -1,21 +1,26 @@
 # Presto Oracle
 A Presto Oracle Driver that offers commercial grade features, performance and customization.
 
-Currently targets PrestoDB, will be ported to PrestoSQL (WIP)
+For `PrestoSQL` updated to verision `0.325`
+
+## TODO
+- CI/CD with Github
+- End to End tests with Oracle Docker Container
+- Update to latest
 
 ## Author
-- Ben DeMott (Arrow)
+- Ben DeMott (Arrow Electronics)
 - ben.demott@gmail.com
 
 ## Features
+This driver features several **Oracle** specific enhancements and compatibilities to make integration more seamless.
+
 - (Optional) Oracle Synonym support via `oracle.synonyms.enabled=true`
 - Correct handling of Oracle `NUMBER` type, including many special options
 - Correct handling of Oracle `DATE` type
 
 ## Jar Dependency
-An oracle JDBC driver must be provided in the plugin directory.
-By default the class `oracle.jdbc.OracleDriver` is checked to ensure the Jar has been loaded correctly.
-You can override which class is used for the class check by specifying the java property: `com.facebook.presto.plugin.oracle.ImportTest`
+The latest Oracle JDBC Driver is included with this package from Maven
 
 ## Tests
 - Decent test coverage for complex logic
@@ -27,9 +32,6 @@ You can override which class is used for the class check by specifying the java 
 - BLOB support `failed: Invalid column type: getString/getNString not implemented for class oracle.jdbc.driver.T4CBlobAccessor`
 - INSERT support `com.facebook.presto.spi.PrestoException: ORA-00972: identifier is too long` 
 - UNBOUNDED VARCHAR
-
-## Features
-This driver features several **Oracle** specific enhancements and compatibilities to make integration more seamless.
 
 ### Future
 - Connection Pooling Support
@@ -76,16 +78,17 @@ This section explains configuration options, and provides some default configura
 ## Configuration Settings Summary
 | Value                                       | Options/Example                                                                    | Default     | Description                                                           |
 | ------------------------------------------- | ---------------------------------------------------------------------------------- | ----------- | --------------------------------------------------------------------- |
-| `unsupported-type.handling-strategy`        | `FAIL`, `IGNORE`, `VARCHAR`                                                        | `IGNORE`    | Action to take when unsupported or custom oracle types are encounered              
-| `oracle.synonyms.enabled`                   | `true`, `false`                                                                    | `false`     | Determines if Synonyms can be used in queries                      
-| `oracle.number.default-type`                | `DECIMAL`, `DOUBLE`, `INTEGER`, `VARCHAR`                                          | `DECIMAL`   | Default type to convert Oracle `NUMBER` types to. Overridden by: `oracle.number.zero-scale-type`, `oracle.number.null-scale-type`                                             
-| `oracle.number.exceeds-limits`              | `ROUND`, `VARCHAR`, `IGNORE`, `FAIL`                                               | `ROUND`     | Determines what action to take when a `NUMBER` column type exceeds the limits of Presto
-| `oracle.number.round-mode`                  | `CEILING`, `DOWN`, `FLOOR`,`HALF_EVEN`, `HALF_DOWN`, `HALF_UP`, `UP`, `UNNECESSARY`| `HALF_EVEN` | When `oracle.number.exceeds-limits` is `ROUND` this determines the method of rounding.
-| `oracle.number.default-scale.decimal`       | `1`, `2`, `35`                                                                     |             | When a `NUMBER` is treated as a `DECIMAL` its scale will be set to this value
-| `oracle.number.default-scale.double`        | `1`, `2`, `35`                                                                     |             | When a `NUMBER` is treated as a `DOUBLE` its scale will be set to this value
-| `oracle.number.default-scale.ratio`         | `0.1`, `0.3`, `0.5`                                                                |             | When a `NUMBER` has no defined scale, its scale will be set as a fraction of the columns precision (or 38) if undefined
-| `oracle.number.zero-scale-type`             | `DECIMAL`, `DOUBLE`, `INTEGER`, `VARCHAR`                                          | `INTEGER`   | When a `NUMBER` scale is zero (`0`) it will be treated as this type. Overrides `oracle.number.default-type`
-| `oracle.number.null-scale-type`             | `DECIMAL`, `DOUBLE`, `INTEGER`, `VARCHAR`                                          |             | When a `NUMBER` scale is undefined (`null`) it will be mapped to this type. Overrides `oracle.number.default-type`                                         
+| unsupported-type.handling-strategy          | `FAIL`, `IGNORE`, `VARCHAR`                                                        | `IGNORE`    | Action to take when unsupported or custom oracle types are encounered
+| oracle.row-prefetch                         | `20`, `50`, `100`                                                                  | `50`        | Oracle JDBC Driver row fetch count (affects performance), testing shows ~100 is ideal  
+| oracle.synonyms.enabled                     | `true`, `false`                                                                    | `false`     | Determines if Synonyms can be used in queries                      
+| oracle.number.default-type                  | `DECIMAL`, `DOUBLE`, `INTEGER`, `VARCHAR`                                          | `DECIMAL`   | Default type to convert Oracle `NUMBER` types to. Overridden by: `oracle.number.zero-scale-type`, `oracle.number.null-scale-type`                                             
+| oracle.number.exceeds-limits                | `ROUND`, `VARCHAR`, `IGNORE`, `FAIL`                                               | `ROUND`     | Determines what action to take when a `NUMBER` column type exceeds the limits of Presto
+| oracle.number.round-mode                    | `CEILING`, `DOWN`, `FLOOR`,`HALF_EVEN`, `HALF_DOWN`, `HALF_UP`, `UP`, `UNNECESSARY`| `HALF_EVEN` | When `oracle.number.exceeds-limits` is `ROUND` this determines the method of rounding.
+| oracle.number.default-scale.decimal         | `1`, `2`, `35`                                                                     |             | When a `NUMBER` is treated as a `DECIMAL` its scale will be set to this value
+| oracle.number.default-scale.double          | `1`, `2`, `35`                                                                     |             | When a `NUMBER` is treated as a `DOUBLE` its scale will be set to this value
+| oracle.number.default-scale.ratio           | `0.1`, `0.3`, `0.5`                                                                |             | When a `NUMBER` has no defined scale, its scale will be set as a fraction of the columns precision (or 38) if undefined
+| oracle.number.zero-scale-type               | `DECIMAL`, `DOUBLE`, `INTEGER`, `VARCHAR`                                          | `INTEGER`   | When a `NUMBER` scale is zero (`0`) it will be treated as this type. Overrides `oracle.number.default-type`
+| oracle.number.null-scale-type               | `DECIMAL`, `DOUBLE`, `INTEGER`, `VARCHAR`                                          |             | When a `NUMBER` scale is undefined (`null`) it will be mapped to this type. Overrides `oracle.number.default-type`                                         
 
 ## Example Configs
 ### Basic config options
@@ -118,7 +121,7 @@ oracle.number.decimal.round-mode=HALF_EVEN
 ```
 
 ### Default NUMBER as `VARCHAR`
-In this configuration we treat all Oracle `NUMBER` types as strings to preserve their accuracy exactly.
+In this configuration we treat all Oracle `NUMBER` types as strings to preserve their accuracy.
 
 When a NUMBER is encountered it will be converted 
 
@@ -137,19 +140,27 @@ oracle.number.type.zero-scale-type=INTEGER
 ## Configuration Properties
 
 ### `unsupported-type.handling-strategy`
-- values: `IGNORE`, `FAIL`, `VARCHAR`
-- description: Determines how unsupported or custom types within Oracle are handled. Columns that are unsupported will
+- **values:** `IGNORE`, `FAIL`, `VARCHAR`
+- **description:** Determines how unsupported or custom types within Oracle are handled. Columns that are unsupported will
                be ignored and excluded from the query result by setting `IGNORE`.
                An exception will be raised when these columns are selected when `FAIL` is set.
                And finally, `VARCHAR` will convert unsupported columns to text.
                Note that this behavior is independent of `oracle.number.exceeds-limits`.
-- default: `IGNORE`
+- **default:** `IGNORE`
+
+### `oracle.row-prefetch`
+- **values:** `INTEGER`
+- **description:** Controls how many rows are fetched from the Oracle Server at a time.
+                   This does have an impact on the performance of retrieving large result sets from Oracle.
+- **default:** `50`
 
 ### `oracle.synonyms.enabled`
 - **values:** `true` | `false`
 - **description:** When enabled allows queries to use Oracle Synonyms. Synonyms in oracle are table and schema *aliases* that 
   map to underlying tables.
 - **default:** `false`
+
+## Configuration Properties (Number Handling)
 
 ### `oracle.number.default-type`
 - **values:** `DECIMAL`, `DOUBLE`, `INTEGER`, `VARCHAR`

@@ -18,13 +18,11 @@ import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import io.airlift.configuration.AbstractConfigurationAwareModule;
-import io.airlift.log.Logger;
 import io.prestosql.plugin.jdbc.BaseJdbcConfig;
 import io.prestosql.plugin.jdbc.ConnectionFactory;
 import io.prestosql.plugin.jdbc.DriverConnectionFactory;
 import io.prestosql.plugin.jdbc.JdbcClient;
 import io.prestosql.plugin.jdbc.credential.CredentialProvider;
-import io.prestosql.spi.statistics.TableStatisticsMetadata;
 import oracle.jdbc.OracleDriver;
 
 import java.util.Properties;
@@ -49,6 +47,7 @@ public class OracleModule
         // Extra oracle-specific connection properties
         Properties connectionProperties = new Properties();
         connectionProperties.setProperty("includeSynonyms", String.valueOf(oracleConfig.isSynonymsEnabled()));
+        connectionProperties.setProperty("defaultRowPrefetch", String.valueOf(oracleConfig.getRowPrefetch()));
 
         return new DriverConnectionFactory(
                 new OracleDriver(),

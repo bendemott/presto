@@ -45,6 +45,7 @@ public class OracleConfig
     private float ratioDefaultScale = UNDEFINED_SCALE;
     private int decimalDefaultScale = UNDEFINED_SCALE;
     private int numberDefaultScale = UNDEFINED_SCALE;
+    private int rowPrefetch = 50;
 
     public boolean isSynonymsEnabled()
     {
@@ -55,6 +56,27 @@ public class OracleConfig
     public OracleConfig setSynonymsEnabled(boolean synonymsEnabled)
     {
         this.synonymsEnabled = synonymsEnabled;
+        return this;
+    }
+
+    /** oracle.row-prefetch */
+    public int getRowPrefetch()
+    {
+        return rowPrefetch;
+    }
+
+    /**
+     * Controls the oracle driver option "defaultRowPrefetch"
+     * Increasing this value will cause the minimum memory allocation per-query to be greater regardless of how many rows are returned.
+     * Tuning this setting can greatly increase performance.
+     *
+     * @param prefetch
+     * @return
+     */
+    @Config("oracle.row-prefetch")
+    public OracleConfig setRowPrefetch(int prefetch)
+    {
+        this.rowPrefetch = prefetch;
         return this;
     }
 
